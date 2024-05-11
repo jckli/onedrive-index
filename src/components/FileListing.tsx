@@ -30,7 +30,9 @@ import MarkdownPreview from './previews/MarkdownPreview'
 import CodePreview from './previews/CodePreview'
 import OfficePreview from './previews/OfficePreview'
 import AudioPreview from './previews/AudioPreview'
-import VideoPreview from './previews/VideoPreview'
+const VideoPreview = dynamic(() => import('./previews/VideoPreview'), {
+  ssr: false,
+})
 import PDFPreview from './previews/PDFPreview'
 import URLPreview from './previews/URLPreview'
 import ImagePreview from './previews/ImagePreview'
@@ -195,13 +197,14 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
 
   if ('folder' in responses[0]) {
     // Expand list of API returns into flattened file data
-    const folderChildren = [].concat(...responses.map(r => r.folder.value)) as OdFolderObject['value']
+    var folderChildren = [].concat(...responses.map(r => r.folder.value)) as OdFolderObject['value']
 
     // Find README.md file to render
     const readmeFile = folderChildren.find(c => c.name.toLowerCase() === 'readme.md')
 
-    // Filtered file list helper
-    const getFiles = () => folderChildren.filter(c => !c.folder && c.name !== '.password')
+    // Get files from folderChildren
+    const getFiles = () => folderChildren.filter(c => (c.file && c.name !== '.password') || c.folder)
+    folderChildren = getFiles()
 
     // File selection
     const genTotalSelected = (selected: { [key: string]: boolean }) => {
