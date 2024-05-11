@@ -190,7 +190,6 @@ export default function SearchModal({
 	setSearchOpen: Dispatch<SetStateAction<boolean>>
 }) {
 	const { query, setQuery, results } = useDriveItemSearch()
-	console.log(results)
 
 	const { t } = useTranslation()
 
