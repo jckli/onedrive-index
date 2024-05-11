@@ -1,4 +1,4 @@
 {
-	"buildCommand": "npm build",
-	"installCommand": "npm install"
+	"buildCommand": "bun run build",
+	"installCommand": "bun install"
 }
