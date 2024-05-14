@@ -9,7 +9,7 @@ import { convertOnelinerToArray, matchProtectedRoute } from '../../utils/protect
 import { checkAuthRoute } from '.'
 
 export const config = {
-	maxDuration: 15,
+	maxDuration: 60,
 }
 
 /**
