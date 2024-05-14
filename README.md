@@ -2,7 +2,7 @@
 
 English | [中文简体](./README.zh-CN.md)
 
-This project is a fork from [spencerwooo/onedrive-vercel-index](https://github.com/spencerwooo/onedrive-vercel-index), based on the archived version from the original author dated June 24, 2023. It includes some minor modifications that allow you to deploy it on Vercel for free, showcasing, sharing, previewing, and downloading your OneDrive files on a webpage. For specific deployment methods, please refer to the instructions below.
+This project is a fork from [iRedScarf/onedrive-index](https://github.com/iRedScarf/onedrive-index), which is a fork from [spencerwooo/onedrive-vercel-index](https://github.com/spencerwooo/onedrive-vercel-index), based on the archived version from the original author dated June 24, 2023. It includes some modifications that make it easier and better for me personally to use, plus some fixes to the issues I encountered during use (although highly scuffed).
 
 > This version has only been tested with an E5 Developer account. Other types of OneDrive accounts need further testing.
 
@@ -59,20 +59,22 @@ The [Demo](https://odi-demo.freeloop.one) of this One-Click Deploy version. | Th
 ## Environment Variables
 
 ### Necessary Variables
-| Name | Description | Original Path | Note |
-| --- | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_TITLE` | Title of the display page | `config/site.config.js` | e.g. Nicaragua's richest man's OneDrive |
-| `USER_PRINCIPAL_NAME` | Your OneDrive account | `config/site.config.js` | **Case-sensitive** |
-| `BASE_DIRECTORY` | The OneDrive directory you want to share | `config/site.config.js` | `/directory name`, root directory is `/` |
-| `CLIENT_ID` | The client ID of the app you registered in Microsoft Azure | `config/api.config.js` | The one provided by the original author has expired, it is recommended to register one yourself, the validity period can be set to two years (anyway, you have to set the API permissions of the account, by the way). The acquisition method refers to the [DOCS](https://ovi.swo.moe/docs/advanced#using-your-own-clientid-and-clientsecret) |
-| `CLIENT_SECRET` | The client secret of the app registered in Microsoft Azure | `config/api.config.js` | The acquisition method is the same, especially note that this **needs to encrypt the original secret with AES** (can be done in the [DOCS](https://ovi.swo.moe/docs/advanced#modify-configs-in-apiconfigjs)) |
+
+| Name                     | Description                                                | Original Path           | Note                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | ---------------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_TITLE` | Title of the display page                                  | `config/site.config.js` | e.g. Nicaragua's richest man's OneDrive                                                                                                                                                                                                                                                                                                        |
+| `USER_PRINCIPAL_NAME`    | Your OneDrive account                                      | `config/site.config.js` | **Case-sensitive**                                                                                                                                                                                                                                                                                                                             |
+| `BASE_DIRECTORY`         | The OneDrive directory you want to share                   | `config/site.config.js` | `/directory name`, root directory is `/`                                                                                                                                                                                                                                                                                                       |
+| `CLIENT_ID`              | The client ID of the app you registered in Microsoft Azure | `config/api.config.js`  | The one provided by the original author has expired, it is recommended to register one yourself, the validity period can be set to two years (anyway, you have to set the API permissions of the account, by the way). The acquisition method refers to the [DOCS](https://ovi.swo.moe/docs/advanced#using-your-own-clientid-and-clientsecret) |
+| `CLIENT_SECRET`          | The client secret of the app registered in Microsoft Azure | `config/api.config.js`  | The acquisition method is the same, especially note that this **needs to encrypt the original secret with AES** (can be done in the [DOCS](https://ovi.swo.moe/docs/advanced#modify-configs-in-apiconfigjs))                                                                                                                                   |
 
 ### Optional Variables
-| Name | Description | Original Path | Note |
-| --- | --- | --- | --- |
-| `NEXT_PUBLIC_PROTECTED_ROUTES` | The path of the folder that needs password access | `config/site.config.js` | Format: `/route1,/route2`, multiple paths are separated by `,` |
-| `NEXT_PUBLIC_EMAIL` | Contact Email displayed in the upper right corner | `config/site.config.js` | `example@example.com` |
-| `KV_PREFIX` | Prefix for KV storage (key-value pair storage) | `config/site.config.js` | Upstash only provides a free `Redis` database, if you want to deploy multiple OneDrive-Index, you can set different `KV_PREFIX` values for different Index, so there will be no key value conflict |
+
+| Name                           | Description                                       | Original Path           | Note                                                                                                                                                                                               |
+| ------------------------------ | ------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_PROTECTED_ROUTES` | The path of the folder that needs password access | `config/site.config.js` | Format: `/route1,/route2`, multiple paths are separated by `,`                                                                                                                                     |
+| `NEXT_PUBLIC_EMAIL`            | Contact Email displayed in the upper right corner | `config/site.config.js` | `example@example.com`                                                                                                                                                                              |
+| `KV_PREFIX`                    | Prefix for KV storage (key-value pair storage)    | `config/site.config.js` | Upstash only provides a free `Redis` database, if you want to deploy multiple OneDrive-Index, you can set different `KV_PREFIX` values for different Index, so there will be no key value conflict |
 
 ## Documentation
 
