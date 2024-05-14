@@ -1,10 +1,9 @@
 import axios from 'axios'
 import useSWRInfinite from 'swr/infinite'
-import useSWR from 'swr'
 
 import type { OdAPIResponse } from '../types'
 
-import { getStoredToken, getAllStoredTokens, matchProtectedRoute } from './protectedRouteHandler'
+import { getStoredToken } from './protectedRouteHandler'
 
 // Common axios fetch function for use with useSWR
 export async function fetcher([url, token]: [url: string, token?: string]): Promise<any> {
@@ -55,13 +54,4 @@ export function useProtectedSWRInfinite(path: string = '') {
 		revalidateOnReconnect: true,
 	}
 	return useSWRInfinite(getNextKey, fetcher, revalidationOptions)
-}
-
-export function useProtectedSWR(query: string = '') {
-	const revalidationOptions = {
-		revalidateIfStale: false,
-		revalidateOnFocus: false,
-		revalidateOnReconnect: true,
-	}
-	return useSWR(`/api/search/?q=${query}`, fetcherWithAllTokens, revalidationOptions)
 }
