@@ -8,6 +8,10 @@ import { OdSearchResult } from '../../types/index'
 import { convertOnelinerToArray, matchProtectedRoute } from '../../utils/protectedRouteHandler'
 import { checkAuthRoute } from '.'
 
+export const config = {
+	maxDuration: 15,
+}
+
 /**
  * Extract the searched item's path in field 'parentReference' and convert it to the
  * absolute path represented in onedrive-index
