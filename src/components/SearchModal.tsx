@@ -14,6 +14,7 @@ import type { OdDriveItem, OdSearchResult } from '../types'
 import { LoadingIcon } from './Loading'
 
 import { getFileIcon } from '../utils/getFileIcon'
+import { getAllStoredTokens, convertArrayToOneliner } from '../utils/protectedRouteHandler'
 import { fetcher } from '../utils/fetchWithSWR'
 import siteConfig from '../../config/site.config'
 
@@ -31,12 +32,15 @@ function mapAbsolutePath(path: string): string {
 
 	// path returned by the API may contain #, by doing a decodeURIComponent and then encodeURIComponent we can
 	// replace URL sensitive characters such as the # with %23
-	return absolutePath.length > 1 // solve https://github.com/spencerwooo/onedrive-vercel-index/issues/539
-		? absolutePath[1]
-			.split('/')
-			.map(p => encodeURIComponent(decodeURIComponent(p)))
-			.join('/')
-		: ''
+	const newPath =
+		absolutePath.length > 1 // solve https://github.com/spencerwooo/onedrive-vercel-index/issues/539
+			? absolutePath[1]
+				.split('/')
+				.map(p => encodeURIComponent(decodeURIComponent(p)))
+				.join('/')
+			: ''
+
+	return newPath
 }
 
 /**
@@ -47,17 +51,11 @@ function mapAbsolutePath(path: string): string {
  */
 function useDriveItemSearch() {
 	const [query, setQuery] = useState('')
+	const tokens = getAllStoredTokens()
+	const oneLinerTokens = convertArrayToOneliner(tokens)
 	const searchDriveItem = async (q: string) => {
-		const { data } = await axios.get<OdSearchResult>(`/api/search/?q=${q}`)
-
-		// Map parentReference to the absolute path of the search result
-		data.map(item => {
-			item['path'] =
-				'path' in item.parentReference
-					? // OneDrive International have the path returned in the parentReference field
-					`${mapAbsolutePath(item.parentReference.path)}`
-					: // OneDrive for Business/Education does not, so we need extra steps here
-					''
+		const { data } = await axios.get<OdSearchResult>(`/api/search/?q=${q}`, {
+			headers: { 'od-protected-tokens': oneLinerTokens },
 		})
 
 		return data
