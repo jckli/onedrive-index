@@ -21,141 +21,150 @@ import Loading from '../Loading'
 import CustomEmbedLinkMenu from '../CustomEmbedLinkMenu'
 
 import 'plyr-react/plyr.css'
+import { argv0 } from 'process'
 
 const VideoPlayer: FC<{
-	videoName: string
-	videoUrl: string
-	width?: number
-	height?: number
-	thumbnail: string
-	subtitle: string
-	isFlv: boolean
-	mpegts: any
+  videoName: string
+  videoUrl: string
+  width?: number
+  height?: number
+  thumbnail: string
+  subtitle: string
+  isFlv: boolean
+  mpegts: any
 }> = ({ videoName, videoUrl, width, height, thumbnail, subtitle, isFlv, mpegts }) => {
-	useEffect(() => {
-		// Really really hacky way to inject subtitles as file blobs into the video element
-		axios
-			.get(subtitle, { responseType: 'blob' })
-			.then(resp => {
-				const track = document.querySelector('track')
-				track?.setAttribute('src', URL.createObjectURL(resp.data))
-			})
-			.catch(() => {
-				console.log('Could not load subtitle.')
-			})
+  useEffect(() => {
+    // Really really hacky way to inject subtitles as file blobs into the video element
+    axios
+      .get(subtitle, { responseType: 'blob' })
+      .then(resp => {
+        const track = document.querySelector('track')
+        track?.setAttribute('src', URL.createObjectURL(resp.data))
+      })
+      .catch(() => {
+        console.log('Could not load subtitle.')
+      })
 
-		if (isFlv) {
-			const loadFlv = () => {
-				// Really hacky way to get the exposed video element from Plyr
-				const video = document.getElementById('plyr')
-				const flv = mpegts.createPlayer({ url: videoUrl, type: 'flv' })
-				flv.attachMediaElement(video)
-				flv.load()
-			}
-			loadFlv()
-		}
-	}, [videoUrl, isFlv, mpegts, subtitle])
+    if (isFlv) {
+      const loadFlv = () => {
+        // Really hacky way to get the exposed video element from Plyr
+        const video = document.getElementById('plyr')
+        const flv = mpegts.createPlayer({ url: videoUrl, type: 'flv' })
+        flv.attachMediaElement(video)
+        flv.load()
+      }
+      loadFlv()
+    }
+  }, [videoUrl, isFlv, mpegts, subtitle])
 
-	// Common plyr configs, including the video source and plyr options
-	const plyrSource = {
-		type: 'video',
-		title: videoName,
-		poster: thumbnail,
-		tracks: [{ kind: 'captions', label: videoName, src: '', default: true }],
-	}
-	const plyrOptions: Plyr.Options = {
-		ratio: `${width ?? 16}:${height ?? 9}`,
-		fullscreen: { iosNative: true },
-	}
-	if (!isFlv) {
-		// If the video is not in flv format, we can use the native plyr and add sources directly with the video URL
-		plyrSource['sources'] = [{ src: videoUrl }]
-	}
-	return <Plyr id="plyr" source={plyrSource as Plyr.SourceInfo} options={plyrOptions} />
+  // Common plyr configs, including the video source and plyr options
+  const plyrSource = {
+    type: 'video',
+    title: videoName,
+    poster: thumbnail,
+    tracks: [{ kind: 'captions', label: videoName, src: '', default: true }],
+  }
+  const plyrOptions: Plyr.Options = {
+    ratio: `${width ?? 16}:${height ?? 9}`,
+    fullscreen: { iosNative: true },
+  }
+  if (!isFlv) {
+    // If the video is not in flv format, we can use the native plyr and add sources directly with the video URL
+    plyrSource['sources'] = [{ src: videoUrl }]
+  }
+  return <Plyr id="plyr" source={plyrSource as Plyr.SourceInfo} options={plyrOptions} />
 }
 
 const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
-	const { asPath } = useRouter()
-	const hashedToken = getStoredToken(asPath)
-	const clipboard = useClipboard()
+  const { asPath } = useRouter()
+  const hashedToken = getStoredToken(asPath)
+  const clipboard = useClipboard()
 
-	const [menuOpen, setMenuOpen] = useState(false)
-	const { t } = useTranslation()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const { t } = useTranslation()
 
-	// OneDrive generates thumbnails for its video files, we pick the thumbnail with the highest resolution
-	const thumbnail = `/api/thumbnail/?path=${asPath}&size=large${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  // OneDrive generates thumbnails for its video files, we pick the thumbnail with the highest resolution
+  const thumbnail = `/api/thumbnail/?path=${asPath}&size=large${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
-	// We assume subtitle files are beside the video with the same name, only webvtt '.vtt' files are supported
-	const vtt = `${asPath.substring(0, asPath.lastIndexOf('.'))}.vtt`
-	const subtitle = `/api/raw/?path=${vtt}${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  // We assume subtitle files are beside the video with the same name, only webvtt '.vtt' files are supported
+  const vtt = `${asPath.substring(0, asPath.lastIndexOf('.'))}.vtt`
+  const subtitle = `/api/raw/?path=${vtt}${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
-	// We also format the raw video file for the in-browser player as well as all other players
-	const videoUrl = `/api/raw/?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  // We also format the raw video file for the in-browser player as well as all other players
+  const videoUrl = `/api/raw/?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
-	const isFlv = getExtension(file.name) === 'flv'
-	const {
-		loading,
-		error,
-		result: mpegts,
-	} = useAsync(async () => {
-		if (isFlv) {
-			return (await import('mpegts.js')).default
-		}
-	}, [isFlv])
+  const isFlv = getExtension(file.name) === 'flv'
+  const {
+    loading,
+    error,
+    result: mpegts,
+  } = useAsync(async () => {
+    if (isFlv) {
+      return (await import('mpegts.js')).default
+    }
+  }, [isFlv])
+  const isWidth = file.video?.width && file.video?.width > 0 ? true : false
+  const isHeight = file.video?.height && file.video?.height > 0 ? true : false
 
-	return (
-		<>
-			<CustomEmbedLinkMenu path={asPath} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-			<PreviewContainer>
-				{error ? (
-					<FourOhFour errorMsg={error.message} />
-				) : loading && isFlv ? (
-					<Loading loadingText={t('Loading FLV extension...')} />
-				) : (
-					<VideoPlayer
-						videoName={file.name}
-						videoUrl={videoUrl}
-						width={file.video?.width}
-						height={file.video?.height}
-						thumbnail={thumbnail}
-						subtitle={subtitle}
-						isFlv={isFlv}
-						mpegts={mpegts}
-					/>
-				)}
-			</PreviewContainer>
+  return (
+    <>
+      <CustomEmbedLinkMenu path={asPath} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+      <PreviewContainer>
+        {!isWidth && !isHeight ? (
+          <FourOhFour
+            errorMsg={t(
+              'No video dimensions. You can watch this video by copying the direct link into a video player like VLC or IINA.'
+            )}
+          />
+        ) : error ? (
+          <FourOhFour errorMsg={error.message} />
+        ) : loading && isFlv ? (
+          <Loading loadingText={t('Loading FLV extension...')} />
+        ) : (
+          <VideoPlayer
+            videoName={file.name}
+            videoUrl={videoUrl}
+            width={file.video?.width}
+            height={file.video?.height}
+            thumbnail={thumbnail}
+            subtitle={subtitle}
+            isFlv={isFlv}
+            mpegts={mpegts}
+          />
+        )}
+      </PreviewContainer>
 
-			<DownloadBtnContainer>
-				<div className="flex flex-wrap justify-center gap-2">
-					<h1 className="mb-2 px-32 text-center text-white">
-						Firefox cannot play .mkv files, so you will need to copy the direct link and put it into a video player like
-						VLC or IINA (and overall watching is better on those players too).
-					</h1>
-					<DownloadButton
-						onClickCallback={() => window.open(videoUrl)}
-						btnColor="blue"
-						btnText={t('Download')}
-						btnIcon="file-download"
-					/>
-					<DownloadButton
-						onClickCallback={() => {
-							clipboard.copy(`${getBaseUrl()}/api/raw/?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`)
-							toast.success(t('Copied direct link to clipboard.'))
-						}}
-						btnColor="pink"
-						btnText={t('Copy direct link')}
-						btnIcon="copy"
-					/>
-					<DownloadButton
-						onClickCallback={() => setMenuOpen(true)}
-						btnColor="teal"
-						btnText={t('Customise link')}
-						btnIcon="pen"
-					/>
-				</div>
-			</DownloadBtnContainer>
-		</>
-	)
+      <DownloadBtnContainer>
+        <div className="flex flex-wrap justify-center gap-2">
+          <h1 className="mb-2 px-32 text-center text-white">
+            Firefox cannot play .mkv files, so you will need to copy the direct link and put it into a video player like
+            VLC or IINA (and overall watching is better on those players too).
+          </h1>
+          <DownloadButton
+            onClickCallback={() => window.open(videoUrl)}
+            btnColor="blue"
+            btnText={t('Download')}
+            btnIcon="file-download"
+          />
+          <DownloadButton
+            onClickCallback={() => {
+              clipboard.copy(`${getBaseUrl()}/api/raw/?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`)
+              toast.success(t('Copied direct link to clipboard.'))
+            }}
+            btnColor="pink"
+            btnText={t('Copy direct link')}
+            btnIcon="copy"
+          />
+          <DownloadButton
+            onClickCallback={() => setMenuOpen(true)}
+            btnColor="teal"
+            btnText={t('Customise link')}
+            btnIcon="pen"
+          />
+        </div>
+      </DownloadBtnContainer>
+    </>
+  )
 }
 
 export default VideoPreview
